@@ -30,6 +30,13 @@ public class ChildRecyclerAdapter extends RecyclerView.Adapter<ChildRecyclerAdap
         tempList.addAll(dataList);
     }
 
+    public void updateList() {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new MyDiffUtilCB(dataList, tempList));
+        dataList.clear();
+        dataList.addAll(tempList);
+        diffResult.dispatchUpdatesTo(this);
+    }
+
     @NonNull
     @Override
     public ChildViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -40,17 +47,8 @@ public class ChildRecyclerAdapter extends RecyclerView.Adapter<ChildRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull ChildViewHolder holder, int position) {
         Datum item = dataList.get(position);
-
         Glide.with(context).load(item.getPF()).into(holder.ivThumbnail);
         holder.tvSubtitle.setText(item.getT());
-
-        holder.itemView.setOnClickListener(v -> {
-            tempList.remove(position);
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new MyDiffUtilCB(dataList, tempList));
-            diffResult.dispatchUpdatesTo(this);
-            dataList.clear();
-            dataList.addAll(tempList);
-        });
     }
 
     @Override
@@ -67,6 +65,13 @@ public class ChildRecyclerAdapter extends RecyclerView.Adapter<ChildRecyclerAdap
             super(itemView);
             ivThumbnail = itemView.findViewById(R.id.iv_thumbnail);
             tvSubtitle = itemView.findViewById(R.id.tv_subtitle);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tempList.remove(getAdapterPosition());
+                    updateList();
+                }
+            });
         }
     }
 }
